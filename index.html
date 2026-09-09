@@ -1655,15 +1655,15 @@
                                 class="bow-grip-group"
                                 id="bowGrip"
                             >
-
-                               <rect
+<rect
     class="grip-hitbox"
     id="gripHitbox"
-    x="30"
-    y="110"
-    width="105"
-    height="140"
+    x="45"
+    y="125"
+    width="75"
+    height="110"
     rx="45"
+/>
 />
                                 />
 
@@ -1892,7 +1892,7 @@ if (touchMode) {
     while (angleDifference > Math.PI) angleDifference -= Math.PI * 2;
     while (angleDifference < -Math.PI) angleDifference += Math.PI * 2;
 
-    aimAngle += angleDifference * 0.35;
+    aimAngle += angleDifference * 0.18;
 
     touchLastAngle = currentAngle;
 } else {
