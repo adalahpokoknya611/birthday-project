@@ -1857,6 +1857,7 @@
         let activePointerId = null;
         let pullDistance = 0;
         let aimAngle = 0;
+        let touchMode = false;
 
         function getPivotScreen() {
             const p = bowSvg.createSVGPoint();
@@ -1877,7 +1878,18 @@
 
             /* Pull direction is opposite the shot direction. */
             const pullAngle = Math.atan2(dy, dx);
-            aimAngle = pullAngle + Math.PI;
+const targetAngle = pullAngle + Math.PI;
+
+if (touchMode) {
+    let angleDifference = targetAngle - aimAngle;
+
+    while (angleDifference > Math.PI) angleDifference -= Math.PI * 2;
+    while (angleDifference < -Math.PI) angleDifference += Math.PI * 2;
+
+    aimAngle += angleDifference * 0.22;
+} else {
+    aimAngle = targetAngle;
+}
 
             let degrees = aimAngle * 180 / Math.PI;
             while (degrees > 180) degrees -= 360;
@@ -1902,8 +1914,9 @@
             );
         }
 
-        gripHitbox.addEventListener("pointerdown", function(event) {
-            if (arrowFlying) return;
+      gripHitbox.addEventListener("pointerdown", function(event) {
+    if (arrowFlying) return;
+    touchMode = event.pointerType === "touch";
             event.preventDefault();
             pulling = true;
             activePointerId = event.pointerId;
