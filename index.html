@@ -1856,8 +1856,10 @@
         let arrowFlying = false;
         let activePointerId = null;
         let pullDistance = 0;
-        let aimAngle = 0;
-        let touchMode = false;
+       let aimAngle = 0;
+let touchMode = false;
+let touchStartAngle = 0;
+let touchStartAimAngle = 0;
 
         function getPivotScreen() {
             const p = bowSvg.createSVGPoint();
@@ -1877,20 +1879,19 @@
             if (distance < 2) return;
 
             /* Pull direction is opposite the shot direction. */
-            const pullAngle = Math.atan2(dy, dx);
+           const pullAngle = Math.atan2(dy, dx);
 const targetAngle = pullAngle + Math.PI;
 
 if (touchMode) {
-    let angleDifference = targetAngle - aimAngle;
+    let angleDifference = targetAngle - touchStartAngle;
 
     while (angleDifference > Math.PI) angleDifference -= Math.PI * 2;
     while (angleDifference < -Math.PI) angleDifference += Math.PI * 2;
 
-    aimAngle += angleDifference * 0.22;
+    aimAngle = touchStartAimAngle + angleDifference * 0.35;
 } else {
     aimAngle = targetAngle;
 }
-
             let degrees = aimAngle * 180 / Math.PI;
             while (degrees > 180) degrees -= 360;
             while (degrees < -180) degrees += 360;
@@ -1917,6 +1918,18 @@ if (touchMode) {
       gripHitbox.addEventListener("pointerdown", function(event) {
     if (arrowFlying) return;
     touchMode = event.pointerType === "touch";
+    if (touchMode) {
+    const bowRect = archery.getBoundingClientRect();
+    const startX = event.clientX - bowRect.left;
+    const startY = event.clientY - bowRect.top;
+
+    touchStartAngle = Math.atan2(
+        startY - REST_Y,
+        startX - REST_X
+    ) + Math.PI;
+
+    touchStartAimAngle = aimAngle;
+}
             event.preventDefault();
             pulling = true;
             activePointerId = event.pointerId;
