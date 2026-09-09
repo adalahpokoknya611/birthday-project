@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+=<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -874,6 +874,7 @@
             fill: transparent;
             pointer-events: all;
             cursor: grab;
+            touch-action: none;
         }
 
         .bow-grip {
@@ -1935,6 +1936,9 @@ let touchLastAngle = 0;
     if (arrowFlying) return;
     touchMode = event.pointerType === "touch";
             event.preventDefault();
+            if (event.pointerType === "touch") {
+                event.stopPropagation();
+            }
             pulling = true;
             activePointerId = event.pointerId;
             try {
@@ -1947,6 +1951,9 @@ let touchLastAngle = 0;
         gripHitbox.addEventListener("pointermove", function(event) {
             if (!pulling || activePointerId !== event.pointerId) return;
             event.preventDefault();
+            if (event.pointerType === "touch") {
+                event.stopPropagation();
+            }
             updateBow(event.clientX, event.clientY);
         });
 
