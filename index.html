@@ -1869,73 +1869,71 @@ let touchLastAngle = 0;
             return m ? p.matrixTransform(m) : null;
         }
 
+        function setFixedBowAngle() {
+            const pivot = getPivotScreen();
+            const targetRect = arrowTarget.getBoundingClientRect();
+
+            if (!pivot || !targetRect.width || !targetRect.height) return;
+
+            const targetX = targetRect.left + targetRect.width / 2;
+            const targetY = targetRect.top + targetRect.height / 2;
+
+            /*
+             * Calculate the angle from the bow grip directly to the heart.
+             * This is set as the bow's permanent resting angle.
+             */
+            const angle =
+                Math.atan2(
+                    targetY - pivot.y,
+                    targetX - pivot.x
+                ) * 180 / Math.PI;
+
+            archery.style.setProperty(
+                "--bow-angle",
+                angle + "deg"
+            );
+
+            aimAngle = angle * Math.PI / 180;
+        }
+
         function updateBow(clientX, clientY) {
             const pivot = getPivotScreen();
             if (!pivot) return;
 
+            /*
+             * BOW IS COMPLETELY FIXED.
+             * No rotation. Only the arrow/grip can be pulled backward.
+             */
+
             const dx = clientX - pivot.x;
-            const dy = clientY - pivot.y;
-            const distance = Math.hypot(dx, dy);
-            if (distance < 2) return;
 
-            /* Pull direction is opposite the shot direction. */
-           const pullAngle = Math.atan2(dy, dx);
-const targetAngle = pullAngle + Math.PI;
+            /*
+             * Pull distance uses only horizontal movement.
+             * The bow angle never changes.
+             */
+            pullDistance = Math.max(
+                0,
+                Math.min(-dx, MAX_PULL)
+            );
 
-
-    let angleDifference = targetAngle - touchStartAngle;
-if (touchMode) {
-    let currentAngle = targetAngle;
-
-    let angleDifference = currentAngle - touchLastAngle;
-
-    while (angleDifference > Math.PI) angleDifference -= Math.PI * 2;
-    while (angleDifference < -Math.PI) angleDifference += Math.PI * 2;
-
-    aimAngle += angleDifference * 0.55;
-
-    touchLastAngle = currentAngle;
-} else {
-    aimAngle = targetAngle;
-}
-            let degrees = aimAngle * 180 / Math.PI;
-            while (degrees > 180) degrees -= 360;
-            while (degrees < -180) degrees += 360;
-            aimAngle = degrees * Math.PI / 180;
-
-            /* Rotate the actual bow around its grip. */
-            archery.style.setProperty("--bow-angle", degrees + "deg");
-
-            /* Pull the nock backward along the bow's local axis. */
-            pullDistance = Math.min(distance, MAX_PULL);
             const pullX = REST_X - pullDistance;
 
+            /* Move only the grip/nock backward. */
             bowGrip.setAttribute(
                 "transform",
                 `translate(${pullX - REST_X} 0)`
             );
 
+            /* String follows the pulled nock. */
             bowString.setAttribute(
                 "d",
                 `M82 55 L${pullX} 180 L82 305`
             );
         }
 
-      gripHitbox.addEventListener("pointerdown", function(event) {
+        gripHitbox.addEventListener("pointerdown", function(event) {
     if (arrowFlying) return;
     touchMode = event.pointerType === "touch";
-    if (touchMode) {
-    const bowRect = archery.getBoundingClientRect();
-    const startX = event.clientX - bowRect.left;
-    const startY = event.clientY - bowRect.top;
-
-    touchStartAngle = Math.atan2(
-        startY - REST_Y,
-        startX - REST_X
-    ) + Math.PI;
-
-    touchStartAimAngle = aimAngle;
-}
             event.preventDefault();
             pulling = true;
             activePointerId = event.pointerId;
@@ -1984,11 +1982,8 @@ if (touchMode) {
             flyingArrow.style.opacity = "1";
             arrowMotion.style.opacity = "0";
 
-            /* Keep the bow pointing exactly where the user aimed. */
-            let degrees = aimAngle * 180 / Math.PI;
-            while (degrees > 180) degrees -= 360;
-            while (degrees < -180) degrees += 360;
-            archery.style.setProperty("--bow-angle", degrees + "deg");
+            /* Bow stays fixed at the angle toward the heart. */
+            setFixedBowAngle();
 
             /* String releases, but bow does NOT change aim. */
             bowGrip.setAttribute("transform", "translate(0 0)");
@@ -2093,7 +2088,7 @@ if (touchMode) {
             pullDistance = 0;
             aimAngle = 0;
 
-            archery.style.setProperty("--bow-angle", "0deg");
+            setFixedBowAngle();
             bowGrip.setAttribute("transform", "translate(0 0)");
             bowString.setAttribute("d", "M82 55 L82 180 L82 305");
             arrowMotion.style.opacity = "1";
