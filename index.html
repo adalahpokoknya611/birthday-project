@@ -1892,7 +1892,7 @@ if (touchMode) {
     while (angleDifference > Math.PI) angleDifference -= Math.PI * 2;
     while (angleDifference < -Math.PI) angleDifference += Math.PI * 2;
 
-    aimAngle += angleDifference * 0.18;
+    aimAngle += angleDifference * 1.0;
 
     touchLastAngle = currentAngle;
 } else {
@@ -1998,6 +1998,7 @@ if (touchMode) {
             const startTime = performance.now();
             const duration =
                 ((FLIGHT_DISTANCE + pullDistance) / ARROW_SPEED) * 1000;
+                let previousTipScreen = null;
 
             function animateArrow(now) {
                 if (!arrowFlying) return;
@@ -2035,12 +2036,46 @@ if (touchMode) {
 
                 const targetY =
                     rect.top + rect.height / 2;
-const hitDistance = Math.hypot(
-    tipScreen.x - targetX,
-    tipScreen.y - targetY
-);
+const collisionRadius = TARGET_HIT_RADIUS + 28;
 
-if (hitDistance <= TARGET_HIT_RADIUS + 28) {
+let hit = false;
+
+if (previousTipScreen) {
+    const vx = tipScreen.x - previousTipScreen.x;
+    const vy = tipScreen.y - previousTipScreen.y;
+
+    const wx = targetX - previousTipScreen.x;
+    const wy = targetY - previousTipScreen.y;
+
+    const segmentLengthSq = vx * vx + vy * vy;
+
+    let t = 0;
+
+    if (segmentLengthSq > 0) {
+        t = (wx * vx + wy * vy) / segmentLengthSq;
+        t = Math.max(0, Math.min(1, t));
+    }
+
+    const closestX =
+        previousTipScreen.x + vx * t;
+
+    const closestY =
+        previousTipScreen.y + vy * t;
+
+    const segmentDistance = Math.hypot(
+        closestX - targetX,
+        closestY - targetY
+    );
+
+    hit = segmentDistance <= collisionRadius;
+}
+
+previousTipScreen = {
+    x: tipScreen.x,
+    y: tipScreen.y
+};
+
+if (hit) {
                     arrowFlying = false;
                     arrowTarget.classList.add("hit");
 
