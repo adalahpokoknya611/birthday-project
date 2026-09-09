@@ -1892,7 +1892,7 @@ if (touchMode) {
     while (angleDifference > Math.PI) angleDifference -= Math.PI * 2;
     while (angleDifference < -Math.PI) angleDifference += Math.PI * 2;
 
-    aimAngle += angleDifference * 1.0;
+    aimAngle += angleDifference * 0.55;
 
     touchLastAngle = currentAngle;
 } else {
