@@ -1,4 +1,4 @@
-=<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -897,7 +897,12 @@
            SOLID SHAFT SO IT CANNOT DISAPPEAR.
            ===================================================== */
 
-        .arrow-motion,
+        .arrow-motion {
+            pointer-events: auto;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
         #flyingArrow {
             pointer-events: none;
         }
@@ -1932,54 +1937,42 @@ let touchLastAngle = 0;
             );
         }
 
-        gripHitbox.addEventListener("pointerdown", function(event) {
-    if (arrowFlying) return;
-    touchMode = event.pointerType === "touch";
+          /*
+         * SIMPLE TAP-TO-SHOOT MECHANIC
+         *
+         * The bow is fixed toward the heart.
+         * No dragging, no pulling, no touch-angle calculations,
+         * and no interaction with page scrolling.
+         */
+
+        function fireFromTap(event) {
+            if (arrowFlying) return;
+
             event.preventDefault();
+
             if (event.pointerType === "touch") {
                 event.stopPropagation();
             }
-            pulling = true;
-            activePointerId = event.pointerId;
-            try {
-                gripHitbox.setPointerCapture(event.pointerId);
-            } catch (e) {}
-            gripHitbox.style.cursor = "grabbing";
-            updateBow(event.clientX, event.clientY);
-        });
 
-        gripHitbox.addEventListener("pointermove", function(event) {
-            if (!pulling || activePointerId !== event.pointerId) return;
-            event.preventDefault();
-            if (event.pointerType === "touch") {
-                event.stopPropagation();
-            }
-            updateBow(event.clientX, event.clientY);
-        });
+            shootArrow();
+        }
 
-        gripHitbox.addEventListener("pointerup", function(event) {
-            if (!pulling || activePointerId !== event.pointerId) return;
-            event.preventDefault();
-            pulling = false;
-            activePointerId = null;
-            gripHitbox.style.cursor = "grab";
+        arrowMotion.addEventListener(
+            "pointerdown",
+            fireFromTap
+        );
 
-            if (pullDistance >= MIN_PULL_TO_SHOOT) {
-                shootArrow();
-            } else {
-                resetBow();
-            }
-        });
-
-        gripHitbox.addEventListener("pointercancel", function() {
-            resetBow();
-        });
+        gripHitbox.addEventListener(
+            "pointerdown",
+            fireFromTap
+        );
 
         function shootArrow() {
             if (arrowFlying) return;
             arrowFlying = true;
 
-            const sourceX = REST_X - pullDistance;
+            const sourceX = REST_X;
+            pullDistance = 0;
 
             /* Flying arrow starts exactly at the pulled nock. */
             flyingArrow.setAttribute(
