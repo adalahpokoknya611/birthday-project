@@ -406,7 +406,7 @@
 
             border:
                 1px solid
-                rgba(255, 255, 255, 0.18);
+                rgba(255, 255, 255, 0.55);
 
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
@@ -2035,13 +2035,12 @@ if (touchMode) {
 
                 const targetY =
                     rect.top + rect.height / 2;
+const hitDistance = Math.hypot(
+    tipScreen.x - targetX,
+    tipScreen.y - targetY
+);
 
-                const hitDistance = Math.hypot(
-                    tipScreen.x - targetX,
-                    tipScreen.y - targetY
-                );
-
-                if (hitDistance <= TARGET_HIT_RADIUS) {
+if (hitDistance <= TARGET_HIT_RADIUS + 28) {
                     arrowFlying = false;
                     arrowTarget.classList.add("hit");
 
