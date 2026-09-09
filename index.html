@@ -2020,62 +2020,21 @@ if (touchMode) {
                 );
 
                 /* Only collision detection uses the heart. */
-                const tip = bowSvg.createSVGPoint();
-                tip.x = currentX + ARROW_LENGTH;
-                tip.y = REST_Y;
+                const arrowRect =
+                    flyingArrow.getBoundingClientRect();
 
-                const tipScreen = tip.matrixTransform(
-                    bowSvg.getScreenCTM()
-                );
-
-                const rect =
+                const targetRect =
                     arrowTarget.getBoundingClientRect();
 
-                const targetX =
-                    rect.left + rect.width / 2;
+                const padding = 18;
 
-                const targetY =
-                    rect.top + rect.height / 2;
-const collisionRadius = TARGET_HIT_RADIUS + 28;
+                const hit =
+                    arrowRect.right >= targetRect.left - padding &&
+                    arrowRect.left <= targetRect.right + padding &&
+                    arrowRect.bottom >= targetRect.top - padding &&
+                    arrowRect.top <= targetRect.bottom + padding;
 
-let hit = false;
-
-if (previousTipScreen) {
-    const vx = tipScreen.x - previousTipScreen.x;
-    const vy = tipScreen.y - previousTipScreen.y;
-
-    const wx = targetX - previousTipScreen.x;
-    const wy = targetY - previousTipScreen.y;
-
-    const segmentLengthSq = vx * vx + vy * vy;
-
-    let t = 0;
-
-    if (segmentLengthSq > 0) {
-        t = (wx * vx + wy * vy) / segmentLengthSq;
-        t = Math.max(0, Math.min(1, t));
-    }
-
-    const closestX =
-        previousTipScreen.x + vx * t;
-
-    const closestY =
-        previousTipScreen.y + vy * t;
-
-    const segmentDistance = Math.hypot(
-        closestX - targetX,
-        closestY - targetY
-    );
-
-    hit = segmentDistance <= collisionRadius;
-}
-
-previousTipScreen = {
-    x: tipScreen.x,
-    y: tipScreen.y
-};
-
-if (hit) {
+                if (hit) {
                     arrowFlying = false;
                     arrowTarget.classList.add("hit");
 
