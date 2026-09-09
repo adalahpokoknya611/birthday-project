@@ -1278,7 +1278,7 @@
     anyway, titip salam buat si Jersey 🦎😝
 </div>
                 <div class="letterHint">
-                    Keep scrolling ↓
+                    KEEP SCROLLINGGG ↓
                 </div>
 
             </div>
@@ -1860,7 +1860,7 @@
 let touchMode = false;
 let touchStartAngle = 0;
 let touchStartAimAngle = 0;
-
+let touchLastAngle = 0;
         function getPivotScreen() {
             const p = bowSvg.createSVGPoint();
             p.x = REST_X;
@@ -1882,13 +1882,19 @@ let touchStartAimAngle = 0;
            const pullAngle = Math.atan2(dy, dx);
 const targetAngle = pullAngle + Math.PI;
 
-if (touchMode) {
+
     let angleDifference = targetAngle - touchStartAngle;
+if (touchMode) {
+    let currentAngle = targetAngle;
+
+    let angleDifference = currentAngle - touchLastAngle;
 
     while (angleDifference > Math.PI) angleDifference -= Math.PI * 2;
     while (angleDifference < -Math.PI) angleDifference += Math.PI * 2;
 
-    aimAngle = touchStartAimAngle + angleDifference * 0.35;
+    aimAngle += angleDifference * 0.35;
+
+    touchLastAngle = currentAngle;
 } else {
     aimAngle = targetAngle;
 }
